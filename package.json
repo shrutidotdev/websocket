@@ -2,16 +2,17 @@
   "name": "websocket",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ws": "^8.19.0"
+    "ws": "^8.19.0",
+    "wscat": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^25.2.2",

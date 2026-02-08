@@ -1,5 +1,4 @@
-import { error } from "node:console";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 
 const wss = new WebSocketServer({ port: 8000 });
 
@@ -7,7 +6,7 @@ console.log("Websocket is running on ws://localhost:8000");
 
 wss.on("connection", (socket, request) => {
   const clientIp = request.socket.remoteAddress;
-  console.log(`New Client got connected from ${ip} address`);
+  console.log(`New Client got connected from ${clientIp} address`);
 
   // server
   socket.send(
@@ -35,15 +34,15 @@ wss.on("connection", (socket, request) => {
         );
       }
     });
+
+    // handle err or we'll be cooked
+    socket.on("error", (error) => {
+      console.error(`❌ Error for ${clientIp} : `, error.message);
+    });
+
+    // handle disconnection
   });
-});
-
-// handle err or we'll be cooked
-socket.on("errors", (error) => {
-  console.error(`❌ Error for ${clientIp} : `, error.message);
-});
-
-// handle disconnection
-socket.on("close", () => {
-  console.log(`👋Client got diconnected: ${clientIp}`);
+  socket.on("close", () => {
+    console.log(`👋Client got diconnected: ${clientIp}`);
+  });
 });
