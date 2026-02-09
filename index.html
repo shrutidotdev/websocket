@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Websocket on Fire🔥</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #fff;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+
+        #status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-connecting {
+            background: #ff9800;
+            color: #000;
+        }
+
+        .status-connected {
+            background: #4CAF50;
+            color: #fff;
+        }
+
+        .status-disconnected {
+            background: #f44336;
+            color: #fff;
+        }
+
+        #messages {
+            background: #bbff00;
+            border: 1px solid #000000;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+
+        .system {
+            background: #1a237e;
+            color: #90caf9;
+        }
+
+        .received {
+            background: #004d40;
+            color: #80cbc4;
+        }
+
+        .sent {
+            background: #1b5e20;
+            color: #a5d6a7;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #2d2d2d;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Websocket on Fire🔥 - Test the Client</h1>
+
+    <div id="status" class="status-connecting">Connecting...</div>
+
+
+
+    <form id="messageForm">
+        <input type="text" id="messageInput" placeholder="Type your message...." required disabled>
+
+        <button type="submit" id="send-btn" disabled>Send</button>
+    </form>
+
+    <h3>Live stream Logs:</h3>
+    <div id="message"></div>
+
+    <script>
+        const statusEl = document.getElementById('status')
+        const message = document.getElementById('message')
+        const form = document.getElementById('messageForm')
+        const input = document.getElementById('messageInput')
+        const sendBtn = document.getElementById('send-btn')
+
+        // Initiating
+        const socket = new WebSocket('ws://localhost:8000');
+
+        const addMessage = (text, type="system") => {
+            const entry = `${new Date().toLocaleTimeString()}`;
+            const messageEle = document.createElement('div');
+            messageEle.className = `message ${type}`;
+            messageEle.textContent = `[${entry}] ${text}`;
+            message.appendChild(messageEle);
+            message.scrollTop = message.scrollHeight;
+        }
+        // open
+        socket.addEventListener('open', () => {
+            statusEl.textContent = "✅ Connected to websocket server on ws://localhost:8000"
+            statusEl.className = 'status-connected'
+            input.disabled = false;
+            sendBtn.disabled = false;
+            addMessage('Connection established!', 'system')
+        })
+        // close
+        socket.addEventListener('close', () => {
+            statusEl.textContent = '❌Disconnected';
+            statusEl.className = 'status-disconnected'
+            input.disabled = true;
+            sendBtn.disabled = true;
+            addMessage('Connection Closed', 'system')
+        })
+
+        socket.addEventListener('error', () => {
+            addMessage('Connection error occurred', 'system')
+            console.error('Websocket err:', error)
+        })
+
+        // recieve message
+        socket.addEventListener('message', (e) => {
+            addMessage(`[RECEIVED]: ${e.data}, 'recieved`);
+        })
+
+        // send message 
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = input.value.trim();
+
+            if(socket.readyState !== WebSocket.OPEN){
+                addMessage('[ERROR]', 'NO Active Tunnel Found')
+            }
+            if(msg && socket.readyState === WebSocket.OPEN){
+                socket.send(msg)
+                addMessage(`  SENT: ${msg} `, 'sent')
+                input.value = "";
+            }
+        })
+    </script>
+</body>
+
+</html>
